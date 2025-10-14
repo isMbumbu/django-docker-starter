@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.coverage
+*.env
+*.venv/
+venv/
+.env
+
+# Django
+*.db
+*.sqlite3
+/staticfiles/
+/media/
+
+# Migrations
+*/migrations/*.pyc
+*/migrations/*.py[cod]
+*/migrations/__pycache__/
+
+# Docker
+docker-compose.override.yml
+postgres_data/
+*.pid
+
+# IDEs
+.idea/
+.vscode/
+*.swp

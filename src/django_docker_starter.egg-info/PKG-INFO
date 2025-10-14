@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: django-docker-starter
+Version: 0.1.0
+Summary: A modern Django starter with Docker, PostgreSQL, and uv
+Requires-Python: >=3.12
+Requires-Dist: django<6.0,>=5.0
+Requires-Dist: psycopg2-binary>=2.9
+Requires-Dist: python-dotenv
