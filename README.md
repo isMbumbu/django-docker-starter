@@ -87,95 +87,65 @@ cp .env.example .env
 
 3. Build images and start services (detached)
 
+# Django Docker Starter
+
+A tiny, production-aware starter for Django 5.x with PostgreSQL and Docker.
+
+Features
+
+- Modern Django (5.x) with Docker-first workflow
+- PostgreSQL 16 (containerized, volume-backed)
+- Auto-creates a superuser from env vars for quick dev boot
+- Reproducible builds via `pyproject.toml`
+
+Quick start (3 commands)
+
 ```bash
+git clone https://github.com/your-username/django-docker-starter.git
+cd django-docker-starter
+cp .env.example .env  # or create .env and paste the sample below
 docker compose up --build -d
 ```
 
-4. Run migrations and (optionally) load initial data
+Then run migrations:
 
 ```bash
 docker compose exec web python manage.py migrate
 ```
 
-After those steps the site is available at: http://localhost:8000
-The admin is at: http://localhost:8000/admin
-
-Notes:
-
-- The repository includes a small helper that automatically creates a Django superuser from environment variables on first-run. See the `create_superuser.py` script under `src/`.
-
-## Environment variables (.env)
-
-Create a `.env` file with the credentials you want to use. For convenience an example file ` .env.example` is provided in this repo (if not, use the sample below).
-
-Example `.env` (development):
+.env (minimal example)
 
 ```env
-# Database
-POSTGRES_DB=django_db_name
-POSTGRES_USER=your_db_user
-POSTGRES_PASSWORD=your_secure_password
+# DB
+POSTGRES_DB=django_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
 
-# Django superuser (created automatically on first run)
+# Superuser (auto-created on first run)
 DJANGO_SUPERUSER_USERNAME=admin
-DJANGO_SUPERUSER_PASSWORD=admin_password
+DJANGO_SUPERUSER_PASSWORD=changeme
 DJANGO_SUPERUSER_EMAIL=admin@example.com
 
-# Django secret key (replace for production)
-DJANGO_SECRET_KEY=a_dummy_secret_key_for_dev_only
-
-# Optional: change host/port mapping if you made adjustments to docker-compose
-# DJANGO_PORT=8000
+# Secret (replace in prod)
+DJANGO_SECRET_KEY=replace_this_in_production
 ```
 
-Security reminder: never commit `.env` to version control and always use a unique, strong `DJANGO_SECRET_KEY` in production.
+Common commands
 
-## Common commands
+- Stop: `docker compose down`
+- Logs: `docker compose logs -f`
+- Run manage command: `docker compose exec web python manage.py <cmd>`
 
-- Start in foreground (useful for logs)
+Project layout (top-level)
 
-```bash
-docker compose up --build
-```
+- `src/` — Django project
+- `Dockerfile`, `docker-compose.yml` — container setup
+- `pyproject.toml` — dependencies
 
-- Stop and remove containers
+Notes & troubleshooting
 
-```bash
-docker compose down
-```
+- Requirements: Docker >=24, Docker Compose v2+
+- If Postgres isn't ready, re-run `migrate` after a few seconds.
+- Don't commit `.env`; use a secrets manager for production.
 
-- Run Django management commands
-
-```bash
-docker compose exec web python manage.py <command>
-```
-
-- View logs (all services)
-
-```bash
-docker compose logs -f
-```
-
-## Project layout
-
-Only the top-level structure is shown here — see the repository for full details.
-
-- `src/` — Django project sources
-  - `manage.py` — Django CLI
-  - `create_superuser.py` — helper that creates superuser from env vars
-  - `apps/` — application modules (e.g., `inventory`)
-- `Dockerfile` — image build for the Django app
-- `docker-compose.yml` & `docker-compose.override.yaml` — service definitions
-- `pyproject.toml` — Python packaging / dependency metadata
-
-## Troubleshooting
-
-- Database connection fails on first run: wait 5-10 seconds and retry migrations. Postgres container may need a moment to initialize.
-- Port conflicts: ensure nothing else is listening on port 8000 or change the port in your compose override.
-- Superuser not created: verify `DJANGO_SUPERUSER_*` variables exist in `.env` and check `docker compose logs web` for errors.
-
-## Contributing & license
-
-Contributions welcome — open an issue or send a PR with improvements. This starter is licensed under the MIT License. See `LICENSE` (if present) for details.
-
----
+Want it even shorter or with badges, a `Makefile`, or an `.env.example` added? Tell me which and I'll add it.
