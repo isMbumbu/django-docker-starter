@@ -8,18 +8,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system deps
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libpq-dev curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy project dependency files
+# Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install uv + sync dependencies
+# Install uv and sync dependencies
 RUN pip install uv && uv sync --frozen --no-dev
 
-# Copy project code
+# Copy source code
 COPY src ./src
 
 # ==========================
@@ -33,11 +33,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Copy built dependencies + source code from builder
+# Copy app + virtual environment from builder
 COPY --from=builder /app /app
 
-# Collect static files safely for production
+# Collect static files for production
 RUN python src/manage.py collectstatic --noinput || true
 
-# Default command (overridden by compose.override.yml)
-CMD ["python", "src/manage.py", "runserver", "0.0.0.0:8000"]
+# Default entrypoint (can be overridden by compose)
+CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
