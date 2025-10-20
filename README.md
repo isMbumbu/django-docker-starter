@@ -38,6 +38,7 @@ DJANGO_SUPERUSER_EMAIL=?
 # .Build and start containers in command line
 ```
 
-bash
-Copy code
+## bash
+
+**Copy code**
 docker compose up --build
