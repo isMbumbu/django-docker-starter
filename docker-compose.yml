@@ -1,4 +1,19 @@
 services:
+  db:
+    image: postgres:16
+    container_name: django_db
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
   web:
     build:
       context: .
@@ -8,22 +23,17 @@ services:
       - .env
     ports:
       - "8000:8000"
-    depends_on:
-      - db
     volumes:
       - ./src:/app/src
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3
-
-  db:
-    image: postgres:16
-    container_name: django_db
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-django_db}
-      POSTGRES_USER: ${POSTGRES_USER:-django_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-django_pass}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python src/manage.py migrate &&
+        python src/create_superuser.py &&
+        python src/manage.py runserver 0.0.0.0:8000
+      "
 
 volumes:
   postgres_data:
