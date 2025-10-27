@@ -147,5 +147,3 @@ Notes & troubleshooting
 - Requirements: Docker >=24, Docker Compose v2+
 - If Postgres isn't ready, re-run `migrate` after a few seconds.
 - Don't commit `.env`; use a secrets manager for production.
-
-Want it even shorter or with badges, a `Makefile`, or an `.env.example` added? Tell me which and I'll add it.
