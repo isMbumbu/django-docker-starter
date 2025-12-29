@@ -19,7 +19,6 @@ COPY pyproject.toml uv.lock ./
 # Install uv and sync dependencies
 RUN pip install uv && uv sync --frozen --no-dev
 
-# Copy source code
 COPY src ./src
 
 # ==========================
@@ -28,16 +27,32 @@ COPY src ./src
 FROM python:3.13-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/app/.venv/bin:$PATH"
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Copy app + virtual environment from builder
+# Copy project + venv
 COPY --from=builder /app /app
 
-# Collect static files for production
-RUN python src/manage.py collectstatic --noinput || true
+# Add entrypoint script
+COPY scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Default entrypoint (can be overridden by compose)
-CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# Use entrypoint to run migrations before starting Gunicorn
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Default Gunicorn command
+CMD [ \
+    "/app/.venv/bin/gunicorn", \
+    "--chdir", \
+    "/app/src", \ 
+    "core.wsgi:application", \
+    "--bind", "0.0.0.0:8000", \
+    "--workers", \
+    "3", \
+    "--access-logfile", "-", \
+    "--error-logfile", "-", \
+    "--log-level", "debug", \
+    "--access-logformat", \
+    "%(h)s \"%(r)s\" %(s)s %(b)s \"%(f)s\" \"%(a)s\" **Host:%({Host}i)s XFF:%({X-Forwarded-For}i)s XFP:%({X-Forwarded-Proto}i)s**" \
+    ]
