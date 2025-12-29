@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: sfinventory_web
+    container_name: djangoapp_web
     env_file:
       - .env  
     environment:
