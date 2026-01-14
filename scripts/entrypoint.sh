@@ -1,8 +1,21 @@
 #!/bin/sh
-# entrypoint.sh — run migrations and start the dev server
 
-echo "Applying database migrations..."
+# Exit immediately if a command fails
+set -e
+
+# 1. CRITICAL: Activate the Virtual Environment for Django/Python commands
+. /app/.venv/bin/activate 
+
+# Apply database migrations
+echo "Running migrations..."
 python src/manage.py migrate --noinput
+python src/create_superuser.py || true
 
-echo "Starting Django server..."
-python src/manage.py runserver 0.0.0.0:8000
+# Collect static files
+echo "Collecting static files..."
+python src/manage.py collectstatic --noinput
+
+# Start the app
+echo "Starting Gunicorn..."
+
+exec "$@"
